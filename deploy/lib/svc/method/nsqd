@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+CMD="/opt/local/bin/nsqd"
+
+
+function option() {
+  if svcprop -p application/$1 nsqd 2> /dev/null > /dev/null
+  then
+    prop="$(svcprop -p application/${1} nsqd | sed 's/\\//g')"
+    for val in $prop
+    do 
+      CMD="${CMD} --${1}=${val}"
+    done
+  fi
+}
+OPTS="data-path broadcast-address deflate e2e-processing-latency-percentile \
+e2e-processing-latency-window-time http-address lookupd-tcp max-body-size \
+max-bytes-per-file max-deflate-level max-heartbeat-interval max-message-size \
+max-msg-timeout max-output-buffer-size max-output-buffer-timeout max-rdy-count \
+mem-queue-size msg-timeout snappy statsd-address statsd-interval statsd-mem-stats \
+statsd-prefix sync-every sync-timeout tcp-address tls-cert tls-key worker-id \
+lookupd-tcp-address"
+
+if svcprop -p application/data-path nsqd 2> /dev/null > /dev/null
+then
+  mkdir -p $(svcprop -p application/data-path nsqd)
+fi
+
+for opt in ${OPTS}
+do
+  option $opt
+done
+
+${CMD} &

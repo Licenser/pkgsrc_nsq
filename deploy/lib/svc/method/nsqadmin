@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+CMD="/opt/local/bin/nsqadmin"
+
+
+function option() {
+  if svcprop -p application/$1 nsqadmin 2> /dev/null > /dev/null
+  then
+    prop="$(svcprop -p application/${1} nsqadmin | sed 's/\\//g')"
+    for val in $prop
+    do 
+      CMD="${CMD} --${1}=${val}"
+    done
+  fi
+}
+OPTS="graphite-url http-address lookupd-http-address notification-http-endpoint \
+nsqd-http-address proxy-graphite statsd-interval statsd-prefix template-dir"
+
+for opt in ${OPTS}
+do
+  option $opt
+done
+
+${CMD} &

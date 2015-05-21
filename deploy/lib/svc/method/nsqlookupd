@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+CMD="/opt/local/bin/nsqlookupd"
+
+
+function option() {
+  if svcprop -p application/$1 nsqlookupd 2> /dev/null > /dev/null
+  then
+    prop="$(svcprop -p application/${1} nsqlookupd | sed 's/\\//g')"
+    for val in $prop
+    do
+      CMD="${CMD} --${1}=${val}"
+    done
+  fi
+}
+OPTS="broadcast-address http-address inactive-producer-timeout tcp-address \
+tombstone-lifetime"
+
+for opt in ${OPTS}
+do
+  option $opt
+done
+
+${CMD} &
